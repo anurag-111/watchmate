@@ -1,19 +1,9 @@
-from django.urls import path, include
-# from watchlist_app.api.views import movie_list, movie_details
-from watchlist_app.api.views import MovieListAV, MovieDetailsAV, StreamPlatformListAV, StreamPlatformDetailsAV
+from django.urls import path
+from watchlist_app.api.views import WatchListAV, WatchDetailAV, StreamPlatformAV, StreamDetailAV
 
 urlpatterns = [
-    path('list/', MovieListAV.as_view(), name = 'movie-list'),
-    path('<int:pk>', MovieDetailsAV.as_view(), name = 'movie-details'),
-    path('stream/list/', StreamPlatformListAV.as_view(), name = 'stream-list'),
-    path('stream/<int:pk>', StreamPlatformDetailsAV.as_view(), name = 'stream-details'),
+    path('list/', WatchListAV.as_view()),
+    path('<int:pk>', WatchDetailAV.as_view()),
+    path('stream/list/', StreamPlatformAV.as_view(),  name='streamplatform-list'),
+    path('stream/<int:pk>', StreamDetailAV.as_view(), name='streamplatform-detail')     
 ]
-
-
-def get_name(first_name: str, last_name: str):
-    return first_name.append(" ").append(last_name)
-
-
-
-
-get_name(last_name="bsrthesl", first_name="anurag")

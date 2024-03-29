@@ -2,11 +2,23 @@ from rest_framework.response import Response
 from rest_framework import status
 # from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from watchlist_app.models import WatchList, StreamPlatform
-from watchlist_app.api.serializers import WatchListSerializer, StreamPlatformSerializer
+from rest_framework import mixins, generics
+
+from watchlist_app.models import WatchList, StreamPlatform, Review
+from watchlist_app.api.serializers import WatchListSerializer, StreamPlatformSerializer, ReviewSerializer
 
 # Class-based views
-class MovieListAV(APIView):
+class ReviewList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+class WatchListAV(APIView):
   def get(self, request):
     movies = WatchList.objects.all()
     serializer = WatchListSerializer(movies, many = True)
@@ -20,10 +32,10 @@ class MovieListAV(APIView):
     else:
       return Response(serializer.errors)
 
-class MovieDetailsAV(APIView):
-  def get(self, request, movie_id):
+class WatchDetailAV(APIView):
+  def get(self, request, pk):
     try:
-      movie = WatchList.objects.get(pk = movie_id)
+      movie = WatchList.objects.get(pk = pk)
     except WatchList.DoesNotExist:
       return Response({'Error' : 'Movie not found'} , status = status.HTTP_404_NOT_FOUND)
       
@@ -44,10 +56,10 @@ class MovieDetailsAV(APIView):
     movie.delete()
     return Response(status = status.HTTP_204_NO_CONTENT)
 
-class StreamPlatformListAV(APIView):
+class StreamPlatformAV(APIView):
   def get(self, request):
     streams = StreamPlatform.objects.all()
-    serializer = StreamPlatformSerializer(streams, many = True)
+    serializer = StreamPlatformSerializer(streams, many = True, context={'request': request})
     return Response(serializer.data)
   
   def post(self, request):
@@ -58,15 +70,15 @@ class StreamPlatformListAV(APIView):
     else:
       return Response(serializer.errors)
 
-class StreamPlatformDetailsAV(APIView):
+class StreamDetailAV(APIView):
   
-  def get(self, reqest, pk):
+  def get(self, request, pk):
     try:
       stream = StreamPlatform.objects.get(pk = pk)
     except StreamPlatform.DoesNotExist:
       return Response({'Error' : 'Stream not found'} , status = status.HTTP_404_NOT_FOUND)
     
-    serializer = StreamPlatformSerializer(stream)
+    serializer = StreamPlatformSerializer(stream, context={'request': request})
     return Response(serializer.data)
   
   def put(self, request, pk):
